@@ -1,15 +1,11 @@
-from supabase import create_client, Client
+from supabase import create_client
 from app.core.config import settings
 
-# Use the service role key on the backend so we bypass RLS for storage
-supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
+supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
+BUCKET = "videos"
 
-BUCKET_NAME = "videos"
-
-def upload_video_bytes(path: str, data: bytes) -> str:
-    """
-    Upload raw bytes to Supabase Storage and return a public URL.
-    """
-    result = supabase.storage.from_(BUCKET_NAME).upload(path, data)
-    public_url = supabase.storage.from_(BUCKET_NAME).get_public_url(path)
-    return public_url
+def upload_video_file(path: str, file_path: str, content_type: str = "video/mp4") -> str:
+    with open(file_path, "rb") as f:
+        data = f.read()
+    supabase.storage.from_(BUCKET).upload(path, data, {"content-type": content_type})
+    return f"{settings.SUPABASE_URL}/storage/v1/object/public/{BUCKET}/{path}"
