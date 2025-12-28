@@ -5,24 +5,30 @@ from dotenv import load_dotenv
 ENV_PATH = Path(__file__).resolve().parents[1] / ".env"  # .../swiftclips-backend/.env
 load_dotenv(dotenv_path=ENV_PATH, override=True)
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.config import settings
 from app.api.routes_upload import router as upload_router
 from app.api.routes_jobs import router as jobs_router
 from app.api.routes_me import router as me_router
+from app.core.startup_checks import run_startup_checks
 
-app = FastAPI(title="SwiftClips API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    run_startup_checks()
+    yield
 
-# ✅ CORS: allow Next dev server on 3000 or 3001, localhost or 127.0.0.1
+app = FastAPI(
+    title="SwiftClips API",
+    lifespan=lifespan,
+)
+
+# ✅ Day 16: CORS via env var (CORS_ORIGINS), with safe dev fallback
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:3001",
-    ],
+    allow_origins=settings.cors_origins_list(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

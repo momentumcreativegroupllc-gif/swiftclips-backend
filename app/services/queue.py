@@ -7,4 +7,4 @@ from app.core.config import settings
 redis_conn = Redis.from_url(settings.REDIS_URL)
 
 # Our main queue for SwiftClips jobs
-queue = Queue("swiftclips", connection=redis_conn)
+queue = Queue(settings.QUEUE_NAME, connection=redis_conn)
