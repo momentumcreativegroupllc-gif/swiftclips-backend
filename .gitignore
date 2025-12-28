@@ -1,11 +1,9 @@
 .venv/
 
 # Python
-.venv/
 __pycache__/
 *.pyc
-
 # Local files
 clip1.mp4
 .env
-.env
+.venv
